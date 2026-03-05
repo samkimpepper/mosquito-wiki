@@ -1,4 +1,4 @@
-package com.mosquito.mosquitowiki;
+package com.mosquito.mosquitowiki.product;
 
 import com.mosquito.mosquitowiki.users.User;
 import jakarta.persistence.*;

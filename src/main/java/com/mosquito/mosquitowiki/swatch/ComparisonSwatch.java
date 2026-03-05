@@ -1,4 +1,4 @@
-package com.mosquito.mosquitowiki;
+package com.mosquito.mosquitowiki.swatch;
 
 import com.mosquito.mosquitowiki.users.User;
 import jakarta.persistence.*;
@@ -6,19 +6,18 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "swatches")
-public class Swatch {
+@Table(name = "comparison_swatches")
+public class ComparisonSwatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(length = 300)
+    private String title;
 
     @Column(columnDefinition = "TEXT")
     private String content;

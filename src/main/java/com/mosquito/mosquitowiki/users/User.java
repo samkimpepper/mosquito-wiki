@@ -1,12 +1,17 @@
 package com.mosquito.mosquitowiki.users;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users",
     uniqueConstraints = @UniqueConstraint(columnNames = {"provider", "provider_id"}))
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Getter
 public class User {
 
     @Id
