@@ -27,6 +27,7 @@ CREATE TABLE categories (
 
 CREATE TABLE products (
     id          BIGSERIAL PRIMARY KEY,
+    parent_id   BIGINT NULL,
     brand_id    BIGINT NOT NULL,
     category_id BIGINT NOT NULL,
     name        VARCHAR(200) NOT NULL,
@@ -34,9 +35,11 @@ CREATE TABLE products (
     slug        VARCHAR(300) UNIQUE,
     description TEXT NULL,
     official_image_url TEXT NULL,
+    view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by  BIGINT NULL,
 
+    CONSTRAINT fk_products_parent FOREIGN KEY (parent_id) REFERENCES products(id),
     CONSTRAINT fk_products_brand FOREIGN KEY (brand_id) REFERENCES brands(id),
     CONSTRAINT fk_products_user FOREIGN KEY (created_by) REFERENCES users(id)
 );
@@ -50,6 +53,7 @@ CREATE TABLE swatches (
     tweet_url   TEXT NULL,
     image_url   TEXT NULL,
     like_count  INT DEFAULT 0,
+    view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_swatches_product FOREIGN KEY (product_id) REFERENCES products(id),
@@ -74,6 +78,7 @@ CREATE TABLE comparison_swatches (
     tweet_url   TEXT NULL,
     image_url   TEXT NULL,
     like_count  INT DEFAULT 0,
+    view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_comparison_swatches_user FOREIGN KEY (user_id) REFERENCES users(id)

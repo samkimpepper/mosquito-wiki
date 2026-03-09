@@ -25,3 +25,6 @@ spring:
 app:
   frontend:
     url: http://localhost:5173
+
+  file:
+    upload-dir: C:/Users/82109/test-images

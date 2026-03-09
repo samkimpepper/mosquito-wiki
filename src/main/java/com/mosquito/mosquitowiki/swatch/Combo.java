@@ -39,6 +39,9 @@ public class Combo {
     @Column(nullable = false)
     private Integer likeCount = 0;
 
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

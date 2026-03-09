@@ -8,6 +8,7 @@ CREATE TABLE combos (
     tweet_url   TEXT NULL,
     image_url   TEXT NULL,
     like_count  INT DEFAULT 0,
+    view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_combos_user   FOREIGN KEY (user_id) REFERENCES users(id)

@@ -1,6 +1,6 @@
 package com.mosquito.mosquitowiki.notification;
 
-import com.mosquito.mosquitowiki.product.Product;
+import com.mosquito.mosquitowiki.product.domain.Product;
 import com.mosquito.mosquitowiki.users.User;
 import jakarta.persistence.*;
 

@@ -1,6 +1,6 @@
 package com.mosquito.mosquitowiki.swatch;
 
-import com.mosquito.mosquitowiki.product.Product;
+import com.mosquito.mosquitowiki.product.domain.Product;
 import jakarta.persistence.*;
 
 @Entity
