@@ -1,5 +1,7 @@
 package com.mosquito.mosquitowiki.auth;
 
+import com.mosquito.mosquitowiki.exception.BaseException;
+import com.mosquito.mosquitowiki.exception.ErrorCode;
 import com.mosquito.mosquitowiki.users.AuthUser;
 import com.mosquito.mosquitowiki.users.User;
 import com.mosquito.mosquitowiki.users.UserRepository;
@@ -36,7 +38,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             providerId = String.valueOf(oAuth2User.getAttribute("id"));
             email = (String) kakaoAccount.get("email");
-            name = (String) profile.get("name");
+            name = (String) profile.get("nickname");
             picture = profile != null ? (String) profile.get("profile_image_url") : null;
         } else {
             providerId = oAuth2User.getAttribute("sub");
@@ -45,7 +47,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             picture = oAuth2User.getAttribute("picture");
         }
 
-        User user = userRepository.findByProviderAndProviderId("google", providerId)
+        User user = userRepository.findByEmail(email)
+                .map(existingUser -> {
+                    // 같은 이메일인데 다른 provider로 로그인 시도한 경우
+                    if (!existingUser.getProvider().equals(provider)) {
+                        throw new BaseException(ErrorCode.EMAIL_ALREADY_REGISTERED_WITH_OTHER_PROVIDER);
+                    }
+                    return existingUser;
+                })
                 .orElseGet(() -> userRepository.save(
                         User.builder()
                                 .email(email)
