@@ -8,14 +8,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class BrandSearchResponse {
+public class BrandDetailResponse {
     private String slug;
     private String name;
     private String nameKo;
     private String logoUrl;
 
-    public static BrandSearchResponse of(Brand brand) {
-        return BrandSearchResponse.builder()
+    public static BrandDetailResponse from(Brand brand) {
+        return BrandDetailResponse.builder()
                 .slug(brand.getSlug())
                 .name(brand.getName())
                 .nameKo(brand.getNameKo())

@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ProductCreateRequest {
-    private Long brandId;
+    private String brandSlug;
     private String name;
     private String nameKo;
     private String option;

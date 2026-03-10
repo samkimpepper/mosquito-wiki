@@ -5,14 +5,17 @@ import com.mosquito.mosquitowiki.exception.ErrorCode;
 import com.mosquito.mosquitowiki.file.FileService;
 import com.mosquito.mosquitowiki.product.domain.Brand;
 import com.mosquito.mosquitowiki.product.dto.BrandCreateRequest;
+import com.mosquito.mosquitowiki.product.dto.BrandDetailResponse;
 import com.mosquito.mosquitowiki.product.dto.BrandSearchResponse;
 import com.mosquito.mosquitowiki.product.repository.BrandRepository;
 import com.mosquito.mosquitowiki.utils.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,28 +24,30 @@ public class BrandService {
     private final BrandRepository brandRepository;
     private final FileService fileService;
 
-    public Long save(BrandCreateRequest request) {
+    public String save(BrandCreateRequest request, MultipartFile image) {
         String slug = SlugUtil.toSlug(request.getName());
         if (brandRepository.existsBySlug(slug)) {
             throw new BaseException(ErrorCode.BRAND_ALREADY_EXISTS);
         }
 
         String imageUrl = null;
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
+        if (image!= null && image.isEmpty()) {
             try {
-                imageUrl = fileService.save(request.getImage());
+                imageUrl = fileService.save(image);
             } catch (IOException e) {
                 throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
             }
         }
 
-        return brandRepository.save(Brand.builder()
+        brandRepository.save(Brand.builder()
                 .name(request.getName())
                 .nameKo(request.getNameKo())
                 .slug(slug)
                 .logoUrl(imageUrl)
-                .build())
-                .getId();
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        return slug;
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +55,11 @@ public class BrandService {
         return brandRepository.searchByName(query).stream()
                 .map(BrandSearchResponse::of)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public BrandDetailResponse showDetail(String slug) {
+        return BrandDetailResponse.from(brandRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND)));
     }
 
 }

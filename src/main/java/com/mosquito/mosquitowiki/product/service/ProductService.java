@@ -2,6 +2,7 @@ package com.mosquito.mosquitowiki.product.service;
 
 import com.mosquito.mosquitowiki.exception.BaseException;
 import com.mosquito.mosquitowiki.exception.ErrorCode;
+import com.mosquito.mosquitowiki.file.FileService;
 import com.mosquito.mosquitowiki.product.domain.Brand;
 import com.mosquito.mosquitowiki.product.domain.Product;
 import com.mosquito.mosquitowiki.product.dto.ProductCreateRequest;
@@ -12,7 +13,10 @@ import com.mosquito.mosquitowiki.utils.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,6 +24,7 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
+    private final FileService fileService;
 
     @Transactional(readOnly = true)
     public List<ProductSearchResponse> search(String query) {
@@ -28,8 +33,8 @@ public class ProductService {
                 .toList();
     }
 
-    public Long save(ProductCreateRequest request) {
-        Brand brand = brandRepository.findById(request.getBrandId()).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
+    public String save(ProductCreateRequest request, MultipartFile image) {
+        Brand brand = brandRepository.findBySlug(request.getBrandSlug()).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
         String brandName = brand.getName();         // Anastasia Beverly Hills
         String productName = request.getName();     // Highlighter
         String optionName = request.getOption();    // Iced out
@@ -53,6 +58,15 @@ public class ProductService {
                             .build()));
         }
 
+        String imageUrl = null;
+        if (image!= null && image.isEmpty()) {
+            try {
+                imageUrl = fileService.save(image);
+            } catch (IOException e) {
+                throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
+            }
+        }
+
         // 실제 제품 등록
         String slug = optionName != null
                 ? SlugUtil.toSlug(brandName + " " + productName + " " + optionName)
@@ -73,9 +87,11 @@ public class ProductService {
                         ? brandNameKo + " " + productNameKo + " " + optionNameKo
                         : brandNameKo + " " + productNameKo)
                 .slug(slug)
+                .officialImageUrl(imageUrl)
+                .createdAt(LocalDateTime.now())
                 .build());
 
-        return product.getId();
+        return product.getSlug();
 
     }
 }

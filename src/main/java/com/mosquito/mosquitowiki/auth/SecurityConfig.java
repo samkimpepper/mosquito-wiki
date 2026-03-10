@@ -21,6 +21,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
+                .formLogin(form -> form.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/api/auth/me").permitAll()
@@ -50,7 +51,14 @@ public class SecurityConfig {
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(List.of("*"));
                     return config;
-                }));
+                }))
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\": \"로그인이 필요합니다.\"}");
+                        })
+                );
 
         return http.build();
     }

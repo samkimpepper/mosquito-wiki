@@ -9,15 +9,17 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ProductSearchResponse {
-    private Long id;
+    private String slug;
     private String name;
-    private String officialImageUrl;
+    private String nameKo;
+    private String image;
 
     public static ProductSearchResponse of(Product product) {
         return ProductSearchResponse.builder()
-                .id(product.getId())
+                .slug(product.getSlug())
                 .name(product.getName())
-                .officialImageUrl(product.getOfficialImageUrl())
+                .nameKo(product.getNameKo())
+                .image(product.getOfficialImageUrl())
                 .build();
     }
 }
