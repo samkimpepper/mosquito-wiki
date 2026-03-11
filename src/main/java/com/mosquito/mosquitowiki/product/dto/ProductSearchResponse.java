@@ -13,13 +13,15 @@ public class ProductSearchResponse {
     private String name;
     private String nameKo;
     private String image;
+    private int swatchCount;
 
     public static ProductSearchResponse of(Product product) {
         return ProductSearchResponse.builder()
                 .slug(product.getSlug())
-                .name(product.getName())
-                .nameKo(product.getNameKo())
+                .name(product.getFullName())
+                .nameKo(product.getFullNameKo())
                 .image(product.getOfficialImageUrl())
+                .swatchCount(0)
                 .build();
     }
 }

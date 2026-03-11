@@ -1,8 +1,7 @@
 package com.mosquito.mosquitowiki.product;
 
-import com.mosquito.mosquitowiki.product.dto.BrandCreateRequest;
-import com.mosquito.mosquitowiki.product.dto.ProductCreateRequest;
-import com.mosquito.mosquitowiki.product.dto.ProductSearchResponse;
+import com.mosquito.mosquitowiki.product.domain.Product;
+import com.mosquito.mosquitowiki.product.dto.*;
 import com.mosquito.mosquitowiki.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +33,20 @@ public class ProductController {
     ) {
         String slug = productService.save(request, image);
         return ResponseEntity.ok(Map.of("slug", slug));
+    }
+
+    @GetMapping("/{slug}")
+    public ResponseEntity<ProductDetailResponse> detail(@PathVariable String slug) {
+        return ResponseEntity.ok(productService.detail(slug));
+    }
+
+    @PutMapping("/{slug}")
+    public ResponseEntity<ProductModifyResponse> modify(
+            @PathVariable String slug,
+            @RequestParam("data") ProductModifyRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        return ResponseEntity.ok(productService.modify(slug, request, image));
     }
 
 }

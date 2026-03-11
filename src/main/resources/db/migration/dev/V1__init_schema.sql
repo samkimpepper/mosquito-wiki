@@ -32,6 +32,8 @@ CREATE TABLE products (
     category_id BIGINT NOT NULL,
     name        VARCHAR(200) NOT NULL,
     name_ko     VARCHAR(300) NULL,
+    option_name  VARCHAR(200) NULL,
+    option_name_ko VARCHAR(300) NULL,
     slug        VARCHAR(300) UNIQUE,
     description TEXT NULL,
     official_image_url TEXT NULL,

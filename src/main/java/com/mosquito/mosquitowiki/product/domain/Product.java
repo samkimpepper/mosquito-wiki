@@ -1,11 +1,10 @@
 package com.mosquito.mosquitowiki.product.domain;
 
+import com.mosquito.mosquitowiki.product.dto.ProductModifyRequest;
 import com.mosquito.mosquitowiki.users.User;
+import com.mosquito.mosquitowiki.utils.SlugUtil;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +41,18 @@ public class Product {
     @Column(length = 300)
     private String nameKo;
 
+    @Column(length = 200)
+    private String optionName;
+
+    @Column(length = 300)
+    private String optionNameKo;
+
+    @Column(length = 200)
+    private String fullName;
+
+    @Column(length = 200)
+    private String fullNameKo;
+
     @Column(length = 300, unique = true)
     private String slug;
 
@@ -53,4 +64,14 @@ public class Product {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void update(ProductModifyRequest request, String image) {
+        if (request.getName() != null) {
+            this.name = request.getName();
+            this.slug = SlugUtil.toSlug(request.getName());
+        }
+        if (request.getNameKo() != null) this.nameKo = request.getNameKo();
+        if (request.getDescription() != null) this.description = request.getDescription();
+        if (image != null) this.officialImageUrl = image;
+    }
 }

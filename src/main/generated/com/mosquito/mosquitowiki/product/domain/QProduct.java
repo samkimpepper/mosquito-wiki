@@ -32,6 +32,10 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath description = createString("description");
 
+    public final StringPath fullName = createString("fullName");
+
+    public final StringPath fullNameKo = createString("fullNameKo");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath name = createString("name");
@@ -39,6 +43,10 @@ public class QProduct extends EntityPathBase<Product> {
     public final StringPath nameKo = createString("nameKo");
 
     public final StringPath officialImageUrl = createString("officialImageUrl");
+
+    public final StringPath optionName = createString("optionName");
+
+    public final StringPath optionNameKo = createString("optionNameKo");
 
     public final QProduct parent;
 

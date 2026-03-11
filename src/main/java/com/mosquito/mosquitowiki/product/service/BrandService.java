@@ -4,10 +4,12 @@ import com.mosquito.mosquitowiki.exception.BaseException;
 import com.mosquito.mosquitowiki.exception.ErrorCode;
 import com.mosquito.mosquitowiki.file.FileService;
 import com.mosquito.mosquitowiki.product.domain.Brand;
+import com.mosquito.mosquitowiki.product.domain.Product;
 import com.mosquito.mosquitowiki.product.dto.BrandCreateRequest;
 import com.mosquito.mosquitowiki.product.dto.BrandDetailResponse;
 import com.mosquito.mosquitowiki.product.dto.BrandSearchResponse;
 import com.mosquito.mosquitowiki.product.repository.BrandRepository;
+import com.mosquito.mosquitowiki.product.repository.ProductRepository;
 import com.mosquito.mosquitowiki.utils.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BrandService {
     private final BrandRepository brandRepository;
+    private final ProductRepository productRepository;
     private final FileService fileService;
 
     public String save(BrandCreateRequest request, MultipartFile image) {
-        String slug = SlugUtil.toSlug(request.getName());
+        String slug = SlugUtil.toSlug(request.getNameKo());
         if (brandRepository.existsBySlug(slug)) {
             throw new BaseException(ErrorCode.BRAND_ALREADY_EXISTS);
         }
@@ -59,7 +62,9 @@ public class BrandService {
 
     @Transactional(readOnly = true)
     public BrandDetailResponse showDetail(String slug) {
-        return BrandDetailResponse.from(brandRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND)));
-    }
+        Brand brand = brandRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
+        List<Product> products = productRepository.findAllByBrand(brand);
 
+        return BrandDetailResponse.from(brand, products);
+    }
 }
