@@ -15,6 +15,7 @@ import java.util.List;
 public class ProductDetailResponse {
     private String slug;
     private String brandSlug;
+    private String brandLogoUrl;
     private String category;
     private String categorySlug;
     private String brandName;
@@ -26,11 +27,13 @@ public class ProductDetailResponse {
     private String description;
     private String officialImageUrl;
     private List<TagRequest> tags;
+    private List<ProductCardResponse> otherOptions;
 
-    public static ProductDetailResponse from(Product product, Brand brand, List<Tag> tags) {
+    public static ProductDetailResponse from(Product product, Brand brand, List<Tag> tags, List<ProductCardResponse> otherOptions) {
         return ProductDetailResponse.builder()
                 .slug(product.getSlug())
                 .brandSlug(brand.getSlug())
+                .brandLogoUrl(brand.getLogoUrl())
                 .category(product.getCategory().getName())
                 .categorySlug(product.getCategory().getSlug())
                 .brandName(brand.getName())
@@ -42,6 +45,7 @@ public class ProductDetailResponse {
                 .description(product.getDescription())
                 .officialImageUrl(product.getOfficialImageUrl())
                 .tags(tags.stream().map(TagRequest::of).toList())
+                .otherOptions(otherOptions)
                 .build();
     }
 }

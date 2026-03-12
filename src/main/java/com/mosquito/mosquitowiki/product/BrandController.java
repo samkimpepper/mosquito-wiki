@@ -25,7 +25,6 @@ public class BrandController {
             @RequestPart("data") BrandCreateRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        log.info("Request: {}", request);
         String slug = brandService.save(request, image);
         return ResponseEntity.ok(Map.of("slug", slug));
     }

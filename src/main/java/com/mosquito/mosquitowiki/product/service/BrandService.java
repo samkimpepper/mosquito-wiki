@@ -34,7 +34,7 @@ public class BrandService {
         }
 
         String imageUrl = null;
-        if (image!= null && image.isEmpty()) {
+        if (image!= null && !image.isEmpty()) {
             try {
                 imageUrl = fileService.save(image);
             } catch (IOException e) {

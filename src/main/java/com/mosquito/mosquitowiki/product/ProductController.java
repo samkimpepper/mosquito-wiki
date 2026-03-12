@@ -41,9 +41,9 @@ public class ProductController {
     }
 
     @PutMapping("/{slug}")
-    public ResponseEntity<ProductModifyResponse> modify(
+    public ResponseEntity<ProductDetailResponse> modify(
             @PathVariable String slug,
-            @RequestParam("data") ProductModifyRequest request,
+            @RequestPart("data") ProductModifyRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         return ResponseEntity.ok(productService.modify(slug, request, image));

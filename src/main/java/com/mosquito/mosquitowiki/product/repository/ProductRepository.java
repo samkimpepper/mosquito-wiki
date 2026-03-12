@@ -16,4 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     boolean existsBySlug(String slug);
 
     List<Product> findAllByBrand(Brand brand);
+
+    List<Product> findAllByParentAndParentIsNotNull(Product parent);
 }

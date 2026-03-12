@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -104,11 +105,11 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductModifyResponse modify(String slug, ProductModifyRequest request, MultipartFile image) {
+    public ProductDetailResponse modify(String slug, ProductModifyRequest request, MultipartFile image) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
 
         String imageUrl = null;
-        if (image!= null && image.isEmpty()) {
+        if (image!= null && !image.isEmpty()) {
             try {
                 imageUrl = fileService.save(image);
             } catch (IOException e) {
@@ -135,8 +136,13 @@ public class ProductService {
 
         List<ProductTag> currentProductTags = productTagRepository.findByProductId(product.getId());
         List<Tag> currentTags = currentProductTags.stream().map(tag -> tag.getTag()).toList();
+        List<ProductCardResponse> otherOptions = productRepository.findAllByParentAndParentIsNotNull(product.getParent())
+                .stream()
+                .map(p -> ProductCardResponse.from(p, slug))
+                .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
+                .toList();
 
-        return ProductModifyResponse.from(product, currentTags);
+        return ProductDetailResponse.from(product, product.getBrand(), currentTags, otherOptions);
 
     }
 
@@ -148,7 +154,13 @@ public class ProductService {
         List<ProductTag> productTags = productTagRepository.findByProductId(product.getId());
         List<Tag> tags = productTags.stream().map(tag -> tag.getTag()).toList();
 
-        return ProductDetailResponse.from(product, brand, tags);
+        List<ProductCardResponse> otherOptions = productRepository.findAllByParentAndParentIsNotNull(product.getParent())
+                .stream()
+                .map(p -> ProductCardResponse.from(p, slug))
+                .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
+                .toList();
+
+        return ProductDetailResponse.from(product, brand, tags, otherOptions);
     }
 
     public boolean isKorean(String str) {
