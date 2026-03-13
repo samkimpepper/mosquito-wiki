@@ -40,6 +40,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.detail(slug));
     }
 
+    @GetMapping("/info/{slug}")
+    public ResponseEntity<ProductSearchResponse> info(@PathVariable String slug) {
+        return ResponseEntity.ok(productService.info(slug));
+    }
+
     @PutMapping("/{slug}")
     public ResponseEntity<ProductDetailResponse> modify(
             @PathVariable String slug,

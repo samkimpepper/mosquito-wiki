@@ -18,8 +18,8 @@ public class ProductSearchResponse {
     public static ProductSearchResponse of(Product product) {
         return ProductSearchResponse.builder()
                 .slug(product.getSlug())
-                .name(product.getFullName())
-                .nameKo(product.getFullNameKo())
+                .name((product.getParent() == null) ? product.getName() : product.getParent().getName() + " " + product.getOptionName())
+                .nameKo((product.getParent() == null) ? product.getNameKo() : product.getParent().getNameKo() + " " + product.getOptionNameKo())
                 .image(product.getOfficialImageUrl())
                 .swatchCount(0)
                 .build();

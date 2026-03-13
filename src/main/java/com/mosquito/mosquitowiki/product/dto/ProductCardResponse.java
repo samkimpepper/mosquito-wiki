@@ -16,16 +16,18 @@ public class ProductCardResponse {
     private String optionName;
     private String optionNameKo;
     private Boolean isCurrent;
+    private Boolean isParent;
 
     public static ProductCardResponse from(Product product, String currentSlug) {
         return ProductCardResponse.builder()
                 .slug(product.getSlug())
                 .officialImageUrl(product.getOfficialImageUrl())
-                .name(product.getName())
-                .nameKo(product.getNameKo())
+                .name((product.getParent() == null) ? product.getName() : product.getParent().getName())
+                .nameKo((product.getParent() == null) ? product.getNameKo() : product.getParent().getNameKo())
                 .optionName(product.getOptionName())
                 .optionNameKo(product.getOptionNameKo())
                 .isCurrent(product.getSlug().equals(currentSlug))
+                .isParent(product.getParent() == null)
                 .build();
     }
 }

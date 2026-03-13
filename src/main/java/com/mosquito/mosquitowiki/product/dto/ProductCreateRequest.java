@@ -10,6 +10,7 @@ public class ProductCreateRequest {
     private String brandSlug;
     private String name;
     private String nameKo;
+    private String parentProductSlug;
     private String option;
     private String optionKo;
     private String categorySlug;

@@ -35,7 +35,7 @@ public class Product {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String name;
 
     @Column(length = 300)

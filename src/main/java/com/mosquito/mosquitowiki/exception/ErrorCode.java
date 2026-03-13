@@ -20,8 +20,8 @@ public enum ErrorCode {
     BRAND_NOT_FOUND(HttpStatus.NOT_FOUND, "브랜드를 찾을 수 없습니다"),
 
     // Product
-    PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 제품입니다");
-
+    PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 제품입니다"),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "제품을 찾을 수 없습니다");
 
 
     private final HttpStatus status;

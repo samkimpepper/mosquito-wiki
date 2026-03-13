@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,11 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public ProductSearchResponse info(String slug) {
+        return ProductSearchResponse.of(productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND)));
+    }
+
     public String save(ProductCreateRequest request, MultipartFile image) {
         Brand brand = brandRepository.findBySlug(request.getBrandSlug()).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
         String brandName = brand.getSlug();         // Anastasia Beverly Hills
@@ -48,15 +54,20 @@ public class ProductService {
 
         Product parent = null;
         if (optionName != null) {
-            String parentSlug = SlugUtil.toSlug(brandName + " " + productNameKo);
+            String parentSlug;
+            if (request.getParentProductSlug() != null) {
+                parentSlug = request.getParentProductSlug();
+            } else {
+                parentSlug = SlugUtil.toSlug(brandName + " " + productNameKo);
+            }
 
             // 이미 부모 제품 있으면 가져오고, 없으면 생성
             parent = productRepository.findBySlug(parentSlug)
                     .orElseGet(() -> productRepository.save(Product.builder()
                             .brand(brand)
                             .category(null)
-                            .name(productName + " " + optionName)
-                            .nameKo(productNameKo + " " + optionNameKo)
+                            .name(productName)
+                            .nameKo(productNameKo)
                             .fullName(brandName + " " + productName)
                             .fullNameKo(brandNameKo + " " + productNameKo)
                             .slug(parentSlug)
@@ -87,12 +98,8 @@ public class ProductService {
                 .brand(brand)
                 .category(null)
                 .parent(parent)
-                .name(optionName != null
-                        ? brandName + " " + productName + " " + optionName
-                        : brandName + " " + productName)
-                .nameKo(optionNameKo != null
-                        ? brandNameKo + " " + productNameKo + " " + optionNameKo
-                        : brandNameKo + " " + productNameKo)
+                .optionName(optionName)
+                .optionNameKo(optionNameKo)
                 .fullName(brand.getName() + " " + productName + " " + optionName)
                 .fullNameKo(brandNameKo + " " + productNameKo + " " + optionNameKo)
                 .slug(slug)
@@ -106,7 +113,7 @@ public class ProductService {
 
     @Transactional
     public ProductDetailResponse modify(String slug, ProductModifyRequest request, MultipartFile image) {
-        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
+        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
 
         String imageUrl = null;
         if (image!= null && !image.isEmpty()) {
@@ -136,7 +143,7 @@ public class ProductService {
 
         List<ProductTag> currentProductTags = productTagRepository.findByProductId(product.getId());
         List<Tag> currentTags = currentProductTags.stream().map(tag -> tag.getTag()).toList();
-        List<ProductCardResponse> otherOptions = productRepository.findAllByParentAndParentIsNotNull(product.getParent())
+        List<ProductCardResponse> otherOptions = productRepository.findAllByParent(product.getParent())
                 .stream()
                 .map(p -> ProductCardResponse.from(p, slug))
                 .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
@@ -148,17 +155,19 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDetailResponse detail(String slug) {
-        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
+        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
         Brand brand = product.getBrand();
 
         List<ProductTag> productTags = productTagRepository.findByProductId(product.getId());
         List<Tag> tags = productTags.stream().map(tag -> tag.getTag()).toList();
 
-        List<ProductCardResponse> otherOptions = productRepository.findAllByParentAndParentIsNotNull(product.getParent())
-                .stream()
+        List<Product> products = productRepository.findAllByParent(product.getParent());
+        products.add(product.getParent());  // parent 추가
+
+        List<ProductCardResponse> otherOptions = products.stream()
                 .map(p -> ProductCardResponse.from(p, slug))
                 .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
-                .toList();
+                .collect(Collectors.toList());
 
         return ProductDetailResponse.from(product, brand, tags, otherOptions);
     }

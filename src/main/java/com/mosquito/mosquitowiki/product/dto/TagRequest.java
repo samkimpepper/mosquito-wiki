@@ -1,13 +1,13 @@
 package com.mosquito.mosquitowiki.product.dto;
 
 import com.mosquito.mosquitowiki.product.domain.Tag;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TagRequest {
     private Long id;
     private String tagType;

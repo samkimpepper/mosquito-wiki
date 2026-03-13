@@ -38,6 +38,11 @@ public class BrandController {
         return ResponseEntity.ok(brandService.search(keyword));
     }
 
+    @GetMapping("/info/{slug}")
+    public ResponseEntity<BrandSearchResponse> info(@PathVariable String slug) {
+        return ResponseEntity.ok(brandService.info(slug));
+    }
+
     @GetMapping("/{slug}")
     public ResponseEntity<BrandDetailResponse> detail(@PathVariable String slug) {
         return ResponseEntity.ok(brandService.showDetail(slug));

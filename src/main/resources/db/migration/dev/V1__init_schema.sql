@@ -30,7 +30,7 @@ CREATE TABLE products (
     parent_id   BIGINT NULL,
     brand_id    BIGINT NOT NULL,
     category_id BIGINT NOT NULL,
-    name        VARCHAR(200) NOT NULL,
+    name        VARCHAR(200) NULL,
     name_ko     VARCHAR(300) NULL,
     option_name  VARCHAR(200) NULL,
     option_name_ko VARCHAR(300) NULL,
