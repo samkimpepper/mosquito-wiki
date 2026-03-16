@@ -107,6 +107,17 @@ CREATE TABLE product_follows (
     CONSTRAINT fk_product_follows_product FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE product_likes (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT,
+    product_id  BIGINT,
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_user_product UNIQUE (user_id, product_id),
+    CONSTRAINT fk_product_likes_user    FOREIGN KEY (user_id)    REFERENCES users(id),
+    CONSTRAINT fk_product_likes_product FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
 CREATE TABLE shoutouts (
     id          BIGSERIAL PRIMARY KEY,
     product_id  BIGINT,

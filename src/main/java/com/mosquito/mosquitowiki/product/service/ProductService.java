@@ -6,6 +6,7 @@ import com.mosquito.mosquitowiki.file.FileService;
 import com.mosquito.mosquitowiki.product.domain.*;
 import com.mosquito.mosquitowiki.product.dto.*;
 import com.mosquito.mosquitowiki.product.repository.*;
+import com.mosquito.mosquitowiki.users.User;
 import com.mosquito.mosquitowiki.utils.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ProductService {
     private final ProductTagRepository productTagRepository;
     private final CategoryRepository categoryRepository;
     private final FileService fileService;
+    private final ProductLikeRepository productLikeRepository;
 
     @Transactional(readOnly = true)
     public List<ProductSearchResponse> search(String query) {
@@ -149,7 +151,9 @@ public class ProductService {
                 .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
                 .toList();
 
-        return ProductDetailResponse.from(product, product.getBrand(), currentTags, otherOptions);
+        long likeCount = productLikeRepository.countByProduct(product);
+
+        return ProductDetailResponse.from(product, product.getBrand(), likeCount, currentTags, otherOptions);
 
     }
 
@@ -169,7 +173,26 @@ public class ProductService {
                 .sorted(Comparator.comparing(ProductCardResponse::getIsCurrent).reversed())
                 .collect(Collectors.toList());
 
-        return ProductDetailResponse.from(product, brand, tags, otherOptions);
+        long likeCount = productLikeRepository.countByProduct(product);
+
+        return ProductDetailResponse.from(product, brand, likeCount, tags, otherOptions);
+    }
+
+    public LikeResponse toggleLike(String slug, User user) {
+        Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        boolean liked = productLikeRepository.existsByProductAndUser(product, user);
+
+        if (liked) {
+            productLikeRepository.deleteByProductAndUser(product, user);
+        } else {
+            productLikeRepository.save(ProductLike.create(product, user));
+        }
+
+        return LikeResponse.builder()
+                .liked(!liked)
+                .likeCount(productLikeRepository.countByProduct(product))
+                .build();
     }
 
     public boolean isKorean(String str) {

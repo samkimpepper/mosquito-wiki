@@ -68,10 +68,23 @@ public class Product {
     public void update(ProductModifyRequest request, String image) {
         if (request.getName() != null) {
             this.name = request.getName();
-            this.slug = SlugUtil.toSlug(request.getName());
         }
-        if (request.getNameKo() != null) this.nameKo = request.getNameKo();
+        if (request.getOption() != null) {
+            this.optionName = request.getOption();
+        }
+        if (request.getNameKo() != null) {
+            this.nameKo = request.getNameKo();
+            slugUpdate();
+        }
+        if (request.getOptionKo() != null) {
+            this.optionNameKo = request.getOptionKo();
+            slugUpdate();
+        }
         if (request.getDescription() != null) this.description = request.getDescription();
         if (image != null) this.officialImageUrl = image;
+    }
+
+    private void slugUpdate() {
+        this.slug = SlugUtil.toSlug(this.brand.getName() + " " + this.nameKo + " " + this.optionNameKo);
     }
 }

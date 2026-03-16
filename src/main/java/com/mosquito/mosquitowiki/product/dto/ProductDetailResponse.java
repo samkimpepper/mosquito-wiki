@@ -26,10 +26,11 @@ public class ProductDetailResponse {
     private String optionNameKo;
     private String description;
     private String officialImageUrl;
+    private long likeCount;
     private List<TagRequest> tags;
     private List<ProductCardResponse> otherOptions;
 
-    public static ProductDetailResponse from(Product product, Brand brand, List<Tag> tags, List<ProductCardResponse> otherOptions) {
+    public static ProductDetailResponse from(Product product, Brand brand, long likeCount, List<Tag> tags, List<ProductCardResponse> otherOptions) {
         return ProductDetailResponse.builder()
                 .slug(product.getSlug())
                 .brandSlug(brand.getSlug())
@@ -44,6 +45,7 @@ public class ProductDetailResponse {
                 .optionNameKo(product.getOptionNameKo())
                 .description(product.getDescription())
                 .officialImageUrl(product.getOfficialImageUrl())
+                .likeCount(likeCount)
                 .tags(tags.stream().map(TagRequest::of).toList())
                 .otherOptions(otherOptions)
                 .build();
