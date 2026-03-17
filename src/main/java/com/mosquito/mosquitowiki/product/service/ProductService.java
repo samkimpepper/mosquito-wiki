@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class ProductService {
         return ProductSearchResponse.of(productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND)));
     }
 
-    public String save(ProductCreateRequest request, MultipartFile image) {
+    public String save(ProductCreateRequest request, List<MultipartFile> images) {
         Brand brand = brandRepository.findBySlug(request.getBrandSlug()).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
         String brandName = brand.getSlug();         // Anastasia Beverly Hills
         String productName = request.getName();     // Highlighter
@@ -78,10 +79,15 @@ public class ProductService {
                             .build()));
         }
 
-        String imageUrl = null;
-        if (image!= null && !image.isEmpty()) {
+        List<String> imageUrls = new ArrayList<>();
+        if (images != null && images.size() > 4) {
+            throw new BaseException(ErrorCode.TOO_MANY_IMAGES);
+        }
+        if (images!= null && !images.isEmpty()) {
             try {
-                imageUrl = fileService.save(image);
+                for (MultipartFile file : images) {
+                    imageUrls.add(fileService.save(file));
+                }
             } catch (IOException e) {
                 throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
             }
@@ -106,7 +112,10 @@ public class ProductService {
                 .fullNameKo(brandNameKo + " " + productNameKo + " " + optionNameKo)
                 .slug(slug)
                 .category(category)
-                .officialImageUrl(imageUrl)
+                .officialImageUrl(imageUrls.size() > 0 ? imageUrls.get(0) : null)
+                .officialImageUrl2(imageUrls.size() > 1 ? imageUrls.get(1) : null)
+                .officialImageUrl3(imageUrls.size() > 2 ? imageUrls.get(2) : null)
+                .officialImageUrl4(imageUrls.size() > 3 ? imageUrls.get(3) : null)
                 .createdAt(LocalDateTime.now())
                 .build());
 
@@ -114,19 +123,23 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDetailResponse modify(String slug, ProductModifyRequest request, MultipartFile image) {
+    public ProductDetailResponse modify(String slug, ProductModifyRequest request, List<MultipartFile> newImages, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        String imageUrl = null;
-        if (image!= null && !image.isEmpty()) {
-            try {
-                imageUrl = fileService.save(image);
-            } catch (IOException e) {
-                throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
-            }
+        List<String> imageUrls = new ArrayList<>();
+        if (newImages != null && newImages.size() > 4) {
+            throw new BaseException(ErrorCode.TOO_MANY_IMAGES);
+        }
+        try {
+            product.updateImageUrl1(resolveImageUrl(request.getImageUrl1(), product.getOfficialImageUrl(), newImages));
+            product.updateImageUrl2(resolveImageUrl(request.getImageUrl2(), product.getOfficialImageUrl2(), newImages));
+            product.updateImageUrl3(resolveImageUrl(request.getImageUrl3(), product.getOfficialImageUrl3(), newImages));
+            product.updateImageUrl4(resolveImageUrl(request.getImageUrl4(), product.getOfficialImageUrl4(), newImages));
+        } catch (IOException e) {
+            throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
         }
 
-        product.update(request, imageUrl);
+        product.update(request, imageUrls);
 
         List<Tag> tags;
         if (!request.getAddTags().isEmpty()) {
@@ -152,13 +165,14 @@ public class ProductService {
                 .toList();
 
         long likeCount = productLikeRepository.countByProduct(product);
+        boolean liked = productLikeRepository.existsByProductAndUser(product, user);
 
-        return ProductDetailResponse.from(product, product.getBrand(), likeCount, currentTags, otherOptions);
+        return ProductDetailResponse.from(product, product.getBrand(), liked, likeCount, currentTags, otherOptions);
 
     }
 
     @Transactional(readOnly = true)
-    public ProductDetailResponse detail(String slug) {
+    public ProductDetailResponse detail(String slug, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
         Brand brand = product.getBrand();
 
@@ -174,10 +188,12 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         long likeCount = productLikeRepository.countByProduct(product);
+        boolean liked = productLikeRepository.existsByProductAndUser(product, user);
 
-        return ProductDetailResponse.from(product, brand, likeCount, tags, otherOptions);
+        return ProductDetailResponse.from(product, brand, liked, likeCount, tags, otherOptions);
     }
 
+    @Transactional(readOnly = true)
     public LikeResponse toggleLike(String slug, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -197,5 +213,22 @@ public class ProductService {
 
     public boolean isKorean(String str) {
         return str.matches(".*[\\uAC00-\\uD7A3\\u3131-\\u318E]+.*");
+    }
+
+    private String resolveImageUrl(String newValue, String currentUrl, List<MultipartFile> newImages) throws IOException {
+        if (newValue == null) {
+            if (currentUrl != null) {
+                fileService.delete(currentUrl);
+            }
+            return null;
+        }
+        if (newValue.startsWith("NEW_")) {
+            if (currentUrl != null) {
+                fileService.delete(currentUrl);  // 기존 파일 삭제 후 새로 업로드
+            }
+            int index = Integer.parseInt(newValue.substring(4));
+            return fileService.save(newImages.get(index));
+        }
+        return newValue;
     }
 }

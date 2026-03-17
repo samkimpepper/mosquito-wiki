@@ -37,6 +37,9 @@ CREATE TABLE products (
     slug        VARCHAR(300) UNIQUE,
     description TEXT NULL,
     official_image_url TEXT NULL,
+    official_image_url2 TEXT NULL,
+    official_image_url3 TEXT NULL,
+    official_image_url4 TEXT NULL,
     view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by  BIGINT NULL,
@@ -54,6 +57,9 @@ CREATE TABLE swatches (
     source_type VARCHAR(20), -- upload or twitter
     tweet_url   TEXT NULL,
     image_url   TEXT NULL,
+    image_url2   TEXT NULL,
+    image_url3   TEXT NULL,
+    image_url4   TEXT NULL,
     like_count  INT DEFAULT 0,
     view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -113,7 +119,7 @@ CREATE TABLE product_likes (
     product_id  BIGINT,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT uq_user_product UNIQUE (user_id, product_id),
+    CONSTRAINT uq_user_product_likes UNIQUE (user_id, product_id),
     CONSTRAINT fk_product_likes_user    FOREIGN KEY (user_id)    REFERENCES users(id),
     CONSTRAINT fk_product_likes_product FOREIGN KEY (product_id) REFERENCES products(id)
 );

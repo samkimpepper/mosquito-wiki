@@ -29,4 +29,12 @@ public class FileService {
         Files.copy(file.getInputStream(), path);
         return "/images/" + filename;
     }
+
+    public void delete(String imageUrl) throws IOException {
+        log.info("Deleting image: {}", imageUrl);
+        String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        Path path = Paths.get(uploadDir, fileName);
+        log.info("Deleting file: {}", path);
+        Files.deleteIfExists(path);
+    }
 }

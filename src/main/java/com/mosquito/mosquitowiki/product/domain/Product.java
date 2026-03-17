@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -62,10 +63,19 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String officialImageUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String officialImageUrl2;
+
+    @Column(columnDefinition = "TEXT")
+    private String officialImageUrl3;
+
+    @Column(columnDefinition = "TEXT")
+    private String officialImageUrl4;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void update(ProductModifyRequest request, String image) {
+    public void update(ProductModifyRequest request, List<String> images) {
         if (request.getName() != null) {
             this.name = request.getName();
         }
@@ -81,10 +91,29 @@ public class Product {
             slugUpdate();
         }
         if (request.getDescription() != null) this.description = request.getDescription();
-        if (image != null) this.officialImageUrl = image;
+        if (images.size() > 0) this.officialImageUrl = images.get(0);
+        if (images.size() > 1) this.officialImageUrl2 = images.get(1);
+        if (images.size() > 2) this.officialImageUrl3 = images.get(2);
+        if (images.size() > 3) this.officialImageUrl4 = images.get(3);
+    }
+
+    public void updateImageUrl1(String imageUrl) {
+        this.officialImageUrl = imageUrl;
+    }
+
+    public void updateImageUrl2(String imageUrl) {
+        this.officialImageUrl2 = imageUrl;
+    }
+
+    public void updateImageUrl3(String imageUrl) {
+        this.officialImageUrl3 = imageUrl;
+    }
+
+    public void updateImageUrl4(String imageUrl) {
+        this.officialImageUrl4 = imageUrl;
     }
 
     private void slugUpdate() {
-        this.slug = SlugUtil.toSlug(this.brand.getName() + " " + this.nameKo + " " + this.optionNameKo);
+        this.slug = SlugUtil.toSlug(this.brand.getNameKo() + " " + this.nameKo + " " + this.optionNameKo);
     }
 }

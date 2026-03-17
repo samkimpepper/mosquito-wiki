@@ -32,15 +32,18 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<Map<String, String>> save(
             @RequestPart("data") ProductCreateRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "image", required = false) List<MultipartFile> images
     ) {
-        String slug = productService.save(request, image);
+        String slug = productService.save(request, images);
         return ResponseEntity.ok(Map.of("slug", slug));
     }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<ProductDetailResponse> detail(@PathVariable String slug) {
-        return ResponseEntity.ok(productService.detail(slug));
+    public ResponseEntity<ProductDetailResponse> detail(
+            @PathVariable String slug,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return ResponseEntity.ok(productService.detail(slug, user.getUser()));
     }
 
     @GetMapping("/info/{slug}")
@@ -52,9 +55,10 @@ public class ProductController {
     public ResponseEntity<ProductDetailResponse> modify(
             @PathVariable String slug,
             @RequestPart("data") ProductModifyRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal AuthUser user
     ) {
-        return ResponseEntity.ok(productService.modify(slug, request, image));
+        return ResponseEntity.ok(productService.modify(slug, request, images, user.getUser()));
     }
 
     @PostMapping("/like/{slug}")

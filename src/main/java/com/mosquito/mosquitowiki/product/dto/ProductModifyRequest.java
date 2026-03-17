@@ -15,4 +15,8 @@ public class ProductModifyRequest {
     private String description;
     private List<TagRequest> addTags;
     private List<Long> removeTags;
+    private String imageUrl1;
+    private String imageUrl2;
+    private String imageUrl3;
+    private String imageUrl4;
 }

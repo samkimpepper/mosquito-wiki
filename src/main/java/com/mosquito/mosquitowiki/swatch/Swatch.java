@@ -34,6 +34,15 @@ public class Swatch {
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl2;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl3;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl4;
+
     @Column(nullable = false)
     private Integer likeCount = 0;
 

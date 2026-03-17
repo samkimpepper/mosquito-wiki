@@ -44,6 +44,12 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath officialImageUrl = createString("officialImageUrl");
 
+    public final StringPath officialImageUrl2 = createString("officialImageUrl2");
+
+    public final StringPath officialImageUrl3 = createString("officialImageUrl3");
+
+    public final StringPath officialImageUrl4 = createString("officialImageUrl4");
+
     public final StringPath optionName = createString("optionName");
 
     public final StringPath optionNameKo = createString("optionNameKo");

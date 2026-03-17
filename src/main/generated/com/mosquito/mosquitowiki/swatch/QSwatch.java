@@ -30,6 +30,12 @@ public class QSwatch extends EntityPathBase<Swatch> {
 
     public final StringPath imageUrl = createString("imageUrl");
 
+    public final StringPath imageUrl2 = createString("imageUrl2");
+
+    public final StringPath imageUrl3 = createString("imageUrl3");
+
+    public final StringPath imageUrl4 = createString("imageUrl4");
+
     public final NumberPath<Integer> likeCount = createNumber("likeCount", Integer.class);
 
     public final com.mosquito.mosquitowiki.product.domain.QProduct product;
