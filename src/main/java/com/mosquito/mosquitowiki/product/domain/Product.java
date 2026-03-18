@@ -3,10 +3,14 @@ package com.mosquito.mosquitowiki.product.domain;
 import com.mosquito.mosquitowiki.product.dto.ProductModifyRequest;
 import com.mosquito.mosquitowiki.users.User;
 import com.mosquito.mosquitowiki.utils.SlugUtil;
+import com.mosquito.mosquitowiki.utils.StringListConverter;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -36,6 +40,10 @@ public class Product {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modified_by")
+    private User modifiedBy;
+
     @Column(length = 200)
     private String name;
 
@@ -60,22 +68,25 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String officialImageUrl;
-
-    @Column(columnDefinition = "TEXT")
-    private String officialImageUrl2;
-
-    @Column(columnDefinition = "TEXT")
-    private String officialImageUrl3;
-
-    @Column(columnDefinition = "TEXT")
-    private String officialImageUrl4;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<String> officialImageUrls = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void update(ProductModifyRequest request, List<String> images) {
+    @Column
+    private LocalDateTime modifiedAt;
+
+    public void updateImage(List<String> images) {
+        this.officialImageUrls = images;
+    }
+
+    public String getOfficialImageUrl() {
+        return this.officialImageUrls != null ? officialImageUrls.get(0) : null;
+    }
+
+    public void update(ProductModifyRequest request, User user) {
         if (request.getName() != null) {
             this.name = request.getName();
         }
@@ -91,26 +102,9 @@ public class Product {
             slugUpdate();
         }
         if (request.getDescription() != null) this.description = request.getDescription();
-        if (images.size() > 0) this.officialImageUrl = images.get(0);
-        if (images.size() > 1) this.officialImageUrl2 = images.get(1);
-        if (images.size() > 2) this.officialImageUrl3 = images.get(2);
-        if (images.size() > 3) this.officialImageUrl4 = images.get(3);
-    }
 
-    public void updateImageUrl1(String imageUrl) {
-        this.officialImageUrl = imageUrl;
-    }
-
-    public void updateImageUrl2(String imageUrl) {
-        this.officialImageUrl2 = imageUrl;
-    }
-
-    public void updateImageUrl3(String imageUrl) {
-        this.officialImageUrl3 = imageUrl;
-    }
-
-    public void updateImageUrl4(String imageUrl) {
-        this.officialImageUrl4 = imageUrl;
+        this.modifiedBy = user;
+        this.modifiedAt = LocalDateTime.now();
     }
 
     private void slugUpdate() {

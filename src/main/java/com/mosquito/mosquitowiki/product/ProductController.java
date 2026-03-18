@@ -32,9 +32,10 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<Map<String, String>> save(
             @RequestPart("data") ProductCreateRequest request,
-            @RequestPart(value = "image", required = false) List<MultipartFile> images
+            @RequestPart(value = "image", required = false) List<MultipartFile> images,
+            @AuthenticationPrincipal AuthUser user
     ) {
-        String slug = productService.save(request, images);
+        String slug = productService.save(request, images, user.getUser());
         return ResponseEntity.ok(Map.of("slug", slug));
     }
 

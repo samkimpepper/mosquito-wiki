@@ -43,7 +43,7 @@ public class ProductService {
         return ProductSearchResponse.of(productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND)));
     }
 
-    public String save(ProductCreateRequest request, List<MultipartFile> images) {
+    public String save(ProductCreateRequest request, List<MultipartFile> images, User user) {
         Brand brand = brandRepository.findBySlug(request.getBrandSlug()).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
         String brandName = brand.getSlug();         // Anastasia Beverly Hills
         String productName = request.getName();     // Highlighter
@@ -76,6 +76,8 @@ public class ProductService {
                             .slug(parentSlug)
                             .category(category)
                             .createdAt(LocalDateTime.now())
+                            .modifiedAt(LocalDateTime.now())
+                            .createdBy(user)
                             .build()));
         }
 
@@ -112,11 +114,10 @@ public class ProductService {
                 .fullNameKo(brandNameKo + " " + productNameKo + " " + optionNameKo)
                 .slug(slug)
                 .category(category)
-                .officialImageUrl(imageUrls.size() > 0 ? imageUrls.get(0) : null)
-                .officialImageUrl2(imageUrls.size() > 1 ? imageUrls.get(1) : null)
-                .officialImageUrl3(imageUrls.size() > 2 ? imageUrls.get(2) : null)
-                .officialImageUrl4(imageUrls.size() > 3 ? imageUrls.get(3) : null)
+                .officialImageUrls(imageUrls)
                 .createdAt(LocalDateTime.now())
+                .modifiedAt(LocalDateTime.now())
+                .createdBy(user)
                 .build());
 
         return product.getSlug();
@@ -126,20 +127,18 @@ public class ProductService {
     public ProductDetailResponse modify(String slug, ProductModifyRequest request, List<MultipartFile> newImages, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<String> imageUrls = new ArrayList<>();
         if (newImages != null && newImages.size() > 4) {
             throw new BaseException(ErrorCode.TOO_MANY_IMAGES);
         }
         try {
-            product.updateImageUrl1(resolveImageUrl(request.getImageUrl1(), product.getOfficialImageUrl(), newImages));
-            product.updateImageUrl2(resolveImageUrl(request.getImageUrl2(), product.getOfficialImageUrl2(), newImages));
-            product.updateImageUrl3(resolveImageUrl(request.getImageUrl3(), product.getOfficialImageUrl3(), newImages));
-            product.updateImageUrl4(resolveImageUrl(request.getImageUrl4(), product.getOfficialImageUrl4(), newImages));
+            List<String> newImageUrls = resolveImageUrl(request.getImageSlots(), newImages, product.getOfficialImageUrls());
+            product.updateImage(newImageUrls);
+
         } catch (IOException e) {
             throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
         }
 
-        product.update(request, imageUrls);
+        product.update(request, user);
 
         List<Tag> tags;
         if (!request.getAddTags().isEmpty()) {
@@ -193,7 +192,7 @@ public class ProductService {
         return ProductDetailResponse.from(product, brand, liked, likeCount, tags, otherOptions);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public LikeResponse toggleLike(String slug, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -215,20 +214,28 @@ public class ProductService {
         return str.matches(".*[\\uAC00-\\uD7A3\\u3131-\\u318E]+.*");
     }
 
-    private String resolveImageUrl(String newValue, String currentUrl, List<MultipartFile> newImages) throws IOException {
-        if (newValue == null) {
-            if (currentUrl != null) {
-                fileService.delete(currentUrl);
+    private List<String> resolveImageUrl(List<String> imageSlots, List<MultipartFile> newImages, List<String> oldImageUrls) throws IOException {
+        List<String> finalImageUrls = new ArrayList<>();
+
+        for (String slot : imageSlots) {
+            if (slot.startsWith("NEW_")) {
+                int idx = Integer.parseInt(slot.substring(4));
+                finalImageUrls.add(fileService.save(newImages.get(idx)));
+            } else {
+                finalImageUrls.add(slot); // 기존 URL 유지
             }
-            return null;
         }
-        if (newValue.startsWith("NEW_")) {
-            if (currentUrl != null) {
-                fileService.delete(currentUrl);  // 기존 파일 삭제 후 새로 업로드
+
+        if (finalImageUrls.size() > 4) {
+            throw new BaseException(ErrorCode.TOO_MANY_IMAGES);
+        }
+
+        for (String oldUrl : oldImageUrls) {
+            if (!finalImageUrls.contains(oldUrl)) {
+                fileService.delete(oldUrl);
             }
-            int index = Integer.parseInt(newValue.substring(4));
-            return fileService.save(newImages.get(index));
         }
-        return newValue;
+
+        return finalImageUrls;
     }
 }

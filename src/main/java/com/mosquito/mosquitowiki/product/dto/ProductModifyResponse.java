@@ -17,7 +17,7 @@ public class ProductModifyResponse {
     private String nameKo;
     private String option;
     private String optionKo;
-    private String officialImageUrl;
+    private List<String> officialImageUrls;
     private String description;
     private List<TagRequest> tags;
 
@@ -28,7 +28,7 @@ public class ProductModifyResponse {
                 .nameKo(product.getNameKo())
                 .option(product.getOptionName())
                 .optionKo(product.getOptionNameKo())
-                .officialImageUrl(product.getOfficialImageUrl())
+                .officialImageUrls(product.getOfficialImageUrls())
                 .description(product.getDescription())
                 .tags(tags.stream().map(TagRequest::of).toList())
                 .build();

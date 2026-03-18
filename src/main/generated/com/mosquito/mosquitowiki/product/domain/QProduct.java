@@ -38,17 +38,15 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = createDateTime("modifiedAt", java.time.LocalDateTime.class);
+
+    public final com.mosquito.mosquitowiki.users.QUser modifiedBy;
+
     public final StringPath name = createString("name");
 
     public final StringPath nameKo = createString("nameKo");
 
-    public final StringPath officialImageUrl = createString("officialImageUrl");
-
-    public final StringPath officialImageUrl2 = createString("officialImageUrl2");
-
-    public final StringPath officialImageUrl3 = createString("officialImageUrl3");
-
-    public final StringPath officialImageUrl4 = createString("officialImageUrl4");
+    public final ListPath<String, StringPath> officialImageUrls = this.<String, StringPath>createList("officialImageUrls", String.class, StringPath.class, PathInits.DIRECT2);
 
     public final StringPath optionName = createString("optionName");
 
@@ -79,6 +77,7 @@ public class QProduct extends EntityPathBase<Product> {
         this.brand = inits.isInitialized("brand") ? new QBrand(forProperty("brand")) : null;
         this.category = inits.isInitialized("category") ? new QCategory(forProperty("category")) : null;
         this.createdBy = inits.isInitialized("createdBy") ? new com.mosquito.mosquitowiki.users.QUser(forProperty("createdBy")) : null;
+        this.modifiedBy = inits.isInitialized("modifiedBy") ? new com.mosquito.mosquitowiki.users.QUser(forProperty("modifiedBy")) : null;
         this.parent = inits.isInitialized("parent") ? new QProduct(forProperty("parent"), inits.get("parent")) : null;
     }
 

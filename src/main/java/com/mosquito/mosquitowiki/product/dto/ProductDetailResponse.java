@@ -25,10 +25,7 @@ public class ProductDetailResponse {
     private String nameKo;
     private String optionNameKo;
     private String description;
-    private String officialImageUrl;
-    private String officialImageUrl2;
-    private String officialImageUrl3;
-    private String officialImageUrl4;
+    private List<String> officialImageUrls;
     private boolean liked;
     private long likeCount;
     private List<TagRequest> tags;
@@ -48,10 +45,7 @@ public class ProductDetailResponse {
                 .nameKo((product.getParent() == null) ? product.getNameKo() : product.getParent().getNameKo())
                 .optionNameKo(product.getOptionNameKo())
                 .description(product.getDescription())
-                .officialImageUrl(product.getOfficialImageUrl())
-                .officialImageUrl2(product.getOfficialImageUrl2())
-                .officialImageUrl3(product.getOfficialImageUrl3())
-                .officialImageUrl4(product.getOfficialImageUrl4())
+                .officialImageUrls(product.getOfficialImageUrls())
                 .liked(liked)
                 .likeCount(likeCount)
                 .tags(tags.stream().map(TagRequest::of).toList())

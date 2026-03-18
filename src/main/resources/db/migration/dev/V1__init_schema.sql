@@ -36,17 +36,17 @@ CREATE TABLE products (
     option_name_ko VARCHAR(300) NULL,
     slug        VARCHAR(300) UNIQUE,
     description TEXT NULL,
-    official_image_url TEXT NULL,
-    official_image_url2 TEXT NULL,
-    official_image_url3 TEXT NULL,
-    official_image_url4 TEXT NULL,
+    official_image_urls jsonb NULL DEFAULT '[]',
     view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by  BIGINT NULL,
+    modified_at TIMESTAMP NULL DEFAULT NOW(),
+    modified_by BIGINT NULL,
 
     CONSTRAINT fk_products_parent FOREIGN KEY (parent_id) REFERENCES products(id),
     CONSTRAINT fk_products_brand FOREIGN KEY (brand_id) REFERENCES brands(id),
-    CONSTRAINT fk_products_user FOREIGN KEY (created_by) REFERENCES users(id)
+    CONSTRAINT fk_products_user FOREIGN KEY (created_by) REFERENCES users(id),
+    CONSTRAINT fk_products_user_modified FOREIGN KEY (modified_by) REFERENCES users(id)
 );
 
 CREATE TABLE swatches (
