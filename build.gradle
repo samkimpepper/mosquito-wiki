@@ -75,7 +75,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// 이 블록 전부 삭제하고 아래로 교체
+
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file("${buildDir}/generated/sources/annotationProcessor/java/main"))
+}
+
 // Q클래스 생성 경로
+/*
 def generated = 'src/main/generated'
 
 sourceSets {
@@ -88,4 +95,4 @@ tasks.withType(JavaCompile) {
 
 clean {
     delete file(generated)
-}
+}*/

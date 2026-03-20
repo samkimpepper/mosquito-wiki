@@ -62,7 +62,7 @@ public class Product {
     @Column(length = 200)
     private String fullNameKo;
 
-    @Column(length = 300, unique = true)
+    @Column(length = 300, unique = true, nullable = false)
     private String slug;
 
     @Column(columnDefinition = "TEXT")
@@ -86,28 +86,33 @@ public class Product {
         return this.officialImageUrls != null ? officialImageUrls.get(0) : null;
     }
 
-    public void update(ProductModifyRequest request, User user) {
+    public void updateName(ProductModifyRequest request, User user) {
         if (request.getName() != null) {
             this.name = request.getName();
+            this.fullName = this.brand.getName() + " " + this.name;
         }
-        if (request.getOption() != null) {
-            this.optionName = request.getOption();
-        }
+
         if (request.getNameKo() != null) {
             this.nameKo = request.getNameKo();
-            slugUpdate();
+            this.fullNameKo = this.brand.getNameKo() + " " + this.nameKo;
         }
-        if (request.getOptionKo() != null) {
-            this.optionNameKo = request.getOptionKo();
-            slugUpdate();
-        }
-        if (request.getDescription() != null) this.description = request.getDescription();
 
         this.modifiedBy = user;
         this.modifiedAt = LocalDateTime.now();
     }
 
-    private void slugUpdate() {
-        this.slug = SlugUtil.toSlug(this.brand.getNameKo() + " " + this.nameKo + " " + this.optionNameKo);
+    public void updateOptionName(Product parent, ProductModifyRequest request, User user) {
+        if (request.getOption() != null) {
+            this.optionName = request.getOption();
+            this.fullName = parent.getFullName() + " " + this.optionName;
+        }
+        if (request.getOptionKo() != null) {
+            this.optionNameKo = request.getOptionKo();
+            this.fullNameKo = parent.getFullNameKo() + " " + this.optionNameKo;
+        }
+        if (request.getDescription() != null) this.description = request.getDescription();
+
+        this.modifiedBy = user;
+        this.modifiedAt = LocalDateTime.now();
     }
 }

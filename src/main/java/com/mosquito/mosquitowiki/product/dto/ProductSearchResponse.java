@@ -14,6 +14,7 @@ public class ProductSearchResponse {
     private String nameKo;
     private String image;
     private int swatchCount;
+    private String categorySlug;
 
     public static ProductSearchResponse of(Product product) {
         return ProductSearchResponse.builder()
@@ -22,6 +23,7 @@ public class ProductSearchResponse {
                 .nameKo((product.getParent() == null) ? product.getNameKo() : product.getParent().getNameKo() + " " + product.getOptionNameKo())
                 .image(product.getOfficialImageUrl())
                 .swatchCount(0)
+                .categorySlug(product.getCategory().getSlug())
                 .build();
     }
 }

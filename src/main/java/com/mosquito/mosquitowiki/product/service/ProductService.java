@@ -3,6 +3,7 @@ package com.mosquito.mosquitowiki.product.service;
 import com.mosquito.mosquitowiki.exception.BaseException;
 import com.mosquito.mosquitowiki.exception.ErrorCode;
 import com.mosquito.mosquitowiki.file.FileService;
+import com.mosquito.mosquitowiki.home.CategoryStatResponse;
 import com.mosquito.mosquitowiki.product.domain.*;
 import com.mosquito.mosquitowiki.product.dto.*;
 import com.mosquito.mosquitowiki.product.repository.*;
@@ -68,7 +69,6 @@ public class ProductService {
             parent = productRepository.findBySlug(parentSlug)
                     .orElseGet(() -> productRepository.save(Product.builder()
                             .brand(brand)
-                            .category(null)
                             .name(productName)
                             .nameKo(productNameKo)
                             .fullName(brandName + " " + productName)
@@ -106,7 +106,6 @@ public class ProductService {
 
         Product product = productRepository.save(Product.builder()
                 .brand(brand)
-                .category(null)
                 .parent(parent)
                 .optionName(optionName)
                 .optionNameKo(optionNameKo)
@@ -126,6 +125,9 @@ public class ProductService {
     @Transactional
     public ProductDetailResponse modify(String slug, ProductModifyRequest request, List<MultipartFile> newImages, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product parent = null;
+        if (product.getParent() != null)
+            parent = product.getParent();
 
         if (newImages != null && newImages.size() > 4) {
             throw new BaseException(ErrorCode.TOO_MANY_IMAGES);
@@ -138,7 +140,11 @@ public class ProductService {
             throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
         }
 
-        product.update(request, user);
+        if (parent != null) {
+            parent.updateName(request, user);
+        } else {
+            product.updateOptionName(parent, request, user);
+        }
 
         List<Tag> tags;
         if (!request.getAddTags().isEmpty()) {
@@ -237,5 +243,15 @@ public class ProductService {
         }
 
         return finalImageUrls;
+    }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return productRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CategoryStatResponse> categoryStat() {
+        return productRepository.countByCategory();
     }
 }

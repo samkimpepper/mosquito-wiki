@@ -6,7 +6,7 @@ CREATE TABLE combos (
     combo_type  VARCHAR(20),
     source_type VARCHAR(20),
     tweet_url   TEXT NULL,
-    image_url   TEXT NULL,
+    image_urls  jsonb NULL DEFAULT '[]',
     like_count  INT DEFAULT 0,
     view_count  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),

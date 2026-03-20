@@ -72,4 +72,9 @@ public class BrandService {
     public BrandSearchResponse info(String slug) {
         return BrandSearchResponse.of(brandRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND)));
     }
+
+    @Transactional(readOnly = true)
+    public long count() {
+        return brandRepository.count();
+    }
 }

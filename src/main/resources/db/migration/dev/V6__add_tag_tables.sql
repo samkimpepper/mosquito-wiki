@@ -1,9 +1,3 @@
-CREATE TABLE tags (
-      id          BIGSERIAL       PRIMARY KEY,
-      tag_type    VARCHAR(100)    ,
-      tag_value   VARCHAR(255)    NOT NULL unique ,
-      color       VARCHAR(7)
-);
 
 CREATE TABLE product_tags (
                               id          BIGSERIAL       PRIMARY KEY,

@@ -1,9 +1,9 @@
 package com.mosquito.mosquitowiki.swatch.repository;
 
-import com.mosquito.mosquitowiki.swatch.ComparisonSwatch;
+import com.mosquito.mosquitowiki.swatch.SwatchLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ComparisonSwatchRepository extends JpaRepository<ComparisonSwatch, Long> {
+public interface SwatchLinkRepository extends JpaRepository<SwatchLink, Long> {
 }

@@ -2,8 +2,12 @@ package com.mosquito.mosquitowiki.swatch;
 
 import com.mosquito.mosquitowiki.users.User;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "combos")
@@ -33,8 +37,9 @@ public class Combo {
     @Column(columnDefinition = "TEXT")
     private String tweetUrl;
 
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<String> imageUrls = new ArrayList<>();
 
     @Column(nullable = false)
     private Integer likeCount = 0;

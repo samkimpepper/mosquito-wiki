@@ -1,9 +1,12 @@
 package com.mosquito.mosquitowiki.swatch;
 
+import com.mosquito.mosquitowiki.product.domain.Tag;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name = "swatch_tags")
+@Getter
 public class SwatchTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,9 +16,7 @@ public class SwatchTag {
     @JoinColumn(name = "swatch_id")
     private Swatch swatch;
 
-    @Column(length = 30)
-    private String tagType;
-
-    @Column(length = 50)
-    private String tagValue;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 }
