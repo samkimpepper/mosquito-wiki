@@ -38,6 +38,7 @@ CREATE TABLE products (
     description TEXT NULL,
     official_image_urls jsonb NULL DEFAULT '[]',
     view_count  INT NOT NULL DEFAULT 0,
+    like_count  INT DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by  BIGINT NULL,
     modified_at TIMESTAMP NULL DEFAULT NOW(),
@@ -51,8 +52,8 @@ CREATE TABLE products (
 
 CREATE TABLE swatches (
     id          BIGSERIAL PRIMARY KEY,
-    product_id  BIGINT NOT NULL,
     user_id     BIGINT NULL,
+    title       TEXT NULL,
     content     TEXT NULL,
     source_type VARCHAR(20), -- upload or twitter
     tweet_url   TEXT NULL,
@@ -85,8 +86,8 @@ CREATE TABLE swatch_tags (
 
 CREATE TABLE swatch_links (
     id          BIGSERIAL PRIMARY KEY,
-    swatch_id    BIGINT,
-    product_id              BIGINT,
+    swatch_id    BIGINT NOT NULL ,
+    product_id              BIGINT NOT NULL ,
     display_order           INT,
 
     CONSTRAINT fk_swatch_links_swatch FOREIGN KEY (swatch_id) REFERENCES swatches(id),

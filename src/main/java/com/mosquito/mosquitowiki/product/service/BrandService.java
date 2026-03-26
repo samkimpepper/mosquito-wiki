@@ -7,6 +7,7 @@ import com.mosquito.mosquitowiki.product.domain.Brand;
 import com.mosquito.mosquitowiki.product.domain.Product;
 import com.mosquito.mosquitowiki.product.dto.BrandCreateRequest;
 import com.mosquito.mosquitowiki.product.dto.BrandDetailResponse;
+import com.mosquito.mosquitowiki.product.dto.BrandModifyRequest;
 import com.mosquito.mosquitowiki.product.dto.BrandSearchResponse;
 import com.mosquito.mosquitowiki.product.repository.BrandRepository;
 import com.mosquito.mosquitowiki.product.repository.ProductRepository;
@@ -76,5 +77,26 @@ public class BrandService {
     @Transactional(readOnly = true)
     public long count() {
         return brandRepository.count();
+    }
+
+    @Transactional
+    public BrandDetailResponse modify(String slug, BrandModifyRequest request, MultipartFile image) {
+        Brand brand = brandRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.BRAND_NOT_FOUND));
+
+        brand.update(request);
+        String newImageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                fileService.delete(brand.getLogoUrl());
+                newImageUrl = fileService.save(image);
+
+                brand.updateImage(newImageUrl);
+            } catch (IOException e) {
+                throw new BaseException(ErrorCode.FILE_UPLOAD_ERROR);
+            }
+        }
+
+        List<Product> products = productRepository.findAllByBrand(brand);
+        return BrandDetailResponse.from(brand, products);
     }
 }

@@ -1,5 +1,6 @@
 package com.mosquito.mosquitowiki.product.domain;
 
+import com.mosquito.mosquitowiki.product.dto.BrandModifyRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,4 +31,16 @@ public class Brand {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void update(BrandModifyRequest request) {
+        if (request.getBrandName() != null)
+            this.name = request.getBrandName();
+        if (request.getBrandNameKo() != null)
+            this.nameKo = request.getBrandNameKo();
+
+    }
+
+    public void updateImage(String newImageUrl) {
+        this.logoUrl = newImageUrl;
+    }
 }

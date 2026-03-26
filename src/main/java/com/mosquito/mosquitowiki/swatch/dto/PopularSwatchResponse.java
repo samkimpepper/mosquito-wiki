@@ -1,21 +1,21 @@
 package com.mosquito.mosquitowiki.swatch.dto;
 
+import com.mosquito.mosquitowiki.product.dto.ProductSearchResponse;
 import com.mosquito.mosquitowiki.swatch.SourceType;
 import com.mosquito.mosquitowiki.swatch.Swatch;
-import com.mosquito.mosquitowiki.users.User;
+import com.mosquito.mosquitowiki.swatch.SwatchLink;
 import com.mosquito.mosquitowiki.users.UserThumbnailResponse;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Setter
 @Builder
-public class SwatchDetailResponse {
+public class PopularSwatchResponse {
     private Long id;
+    private String title;
     private String content;
     private LocalDateTime createdAt;
     private List<String> imageUrls;
@@ -24,10 +24,12 @@ public class SwatchDetailResponse {
     private SourceType sourceType;
     private String tweetUrl;
     private UserThumbnailResponse user;
+    private List<ProductSearchResponse> products;
 
-    public static SwatchDetailResponse from(Swatch swatch, boolean liked) {
-        return SwatchDetailResponse.builder()
+    public static PopularSwatchResponse of(Swatch swatch, List<SwatchLink> swatchLinks, boolean liked) {
+        return PopularSwatchResponse.builder()
                 .id(swatch.getId())
+                .title(swatch.getTitle())
                 .content(swatch.getContent())
                 .createdAt(swatch.getCreatedAt())
                 .imageUrls(swatch.getImageUrls())
@@ -36,6 +38,7 @@ public class SwatchDetailResponse {
                 .sourceType(swatch.getSourceType())
                 .tweetUrl(swatch.getTweetUrl())
                 .user(UserThumbnailResponse.from(swatch.getUser()))
+                .products(swatchLinks.stream().map(SwatchLink::getProduct).map(ProductSearchResponse::of).toList())
                 .build();
     }
 }

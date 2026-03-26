@@ -72,11 +72,29 @@ public class Product {
     @Column(columnDefinition = "jsonb")
     private List<String> officialImageUrls = new ArrayList<>();
 
+    @Column(nullable = false)
+    private Integer likeCount = 0;
+
+    @Column(nullable = false)
+    private Integer viewCount = 0;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column
     private LocalDateTime modifiedAt;
+
+    public void like() {
+        likeCount++;
+    }
+
+    public void unlike() {
+        likeCount--;
+    }
+
+    public void view() {
+        viewCount++;
+    }
 
     public void updateImage(List<String> images) {
         this.officialImageUrls = images;

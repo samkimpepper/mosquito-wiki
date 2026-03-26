@@ -2,6 +2,7 @@ package com.mosquito.mosquitowiki.product;
 
 import com.mosquito.mosquitowiki.product.dto.BrandCreateRequest;
 import com.mosquito.mosquitowiki.product.dto.BrandDetailResponse;
+import com.mosquito.mosquitowiki.product.dto.BrandModifyRequest;
 import com.mosquito.mosquitowiki.product.dto.BrandSearchResponse;
 import com.mosquito.mosquitowiki.product.service.BrandService;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +47,14 @@ public class BrandController {
     @GetMapping("/{slug}")
     public ResponseEntity<BrandDetailResponse> detail(@PathVariable String slug) {
         return ResponseEntity.ok(brandService.showDetail(slug));
+    }
+
+    @PutMapping("/{slug}")
+    public ResponseEntity<BrandDetailResponse> modify(
+            @PathVariable String slug,
+            @RequestPart("data") BrandModifyRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        return ResponseEntity.ok(brandService.modify(slug, request, image));
     }
 }

@@ -7,9 +7,13 @@ import com.mosquito.mosquitowiki.home.CategoryStatResponse;
 import com.mosquito.mosquitowiki.product.domain.*;
 import com.mosquito.mosquitowiki.product.dto.*;
 import com.mosquito.mosquitowiki.product.repository.*;
+import com.mosquito.mosquitowiki.swatch.repository.SwatchLinkRepository;
 import com.mosquito.mosquitowiki.users.User;
 import com.mosquito.mosquitowiki.utils.SlugUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +36,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final FileService fileService;
     private final ProductLikeRepository productLikeRepository;
+    private final SwatchLinkRepository swatchLinkRepository;
 
     @Transactional(readOnly = true)
     public List<ProductSearchResponse> search(String query) {
@@ -75,6 +81,8 @@ public class ProductService {
                             .fullNameKo(brandNameKo + " " + productNameKo)
                             .slug(parentSlug)
                             .category(category)
+                            .likeCount(0)
+                            .viewCount(0)
                             .createdAt(LocalDateTime.now())
                             .modifiedAt(LocalDateTime.now())
                             .createdBy(user)
@@ -116,6 +124,8 @@ public class ProductService {
                 .officialImageUrls(imageUrls)
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
+                .likeCount(0)
+                .viewCount(0)
                 .createdBy(user)
                 .build());
 
@@ -171,12 +181,13 @@ public class ProductService {
 
         long likeCount = productLikeRepository.countByProduct(product);
         boolean liked = productLikeRepository.existsByProductAndUser(product, user);
+        long swatchCount = swatchLinkRepository.countByProduct(product);
 
-        return ProductDetailResponse.from(product, product.getBrand(), liked, likeCount, currentTags, otherOptions);
+        return ProductDetailResponse.from(product, product.getBrand(), liked, likeCount, swatchCount, currentTags, otherOptions);
 
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ProductDetailResponse detail(String slug, User user) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new BaseException(ErrorCode.PRODUCT_NOT_FOUND));
         Brand brand = product.getBrand();
@@ -194,8 +205,11 @@ public class ProductService {
 
         long likeCount = productLikeRepository.countByProduct(product);
         boolean liked = productLikeRepository.existsByProductAndUser(product, user);
+        long swatchCount = swatchLinkRepository.countByProduct(product);
 
-        return ProductDetailResponse.from(product, brand, liked, likeCount, tags, otherOptions);
+        product.view();
+
+        return ProductDetailResponse.from(product, brand, liked, likeCount, swatchCount, tags, otherOptions);
     }
 
     @Transactional
@@ -206,8 +220,10 @@ public class ProductService {
 
         if (liked) {
             productLikeRepository.deleteByProductAndUser(product, user);
+            product.unlike();
         } else {
             productLikeRepository.save(ProductLike.create(product, user));
+            product.like();
         }
 
         return LikeResponse.builder()
@@ -253,5 +269,19 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<CategoryStatResponse> categoryStat() {
         return productRepository.countByCategory();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PopularProductResponse> popularProducts(int page, int size, String categorySlug) {
+        Page<Product> products = productRepository.findPopularProducts(categorySlug, PageRequest.of(page, size));
+
+        List<ProductTag> productTags = productTagRepository.findByProductIn(products.stream().toList());
+        Map<Long, List<Tag>> tagMap = productTags.stream()
+                .collect(Collectors.groupingBy(
+                        pt -> pt.getProduct().getId(),
+                        Collectors.mapping(ProductTag::getTag, Collectors.toList())
+                ));
+
+        return products.map(p -> PopularProductResponse.of(p, tagMap.getOrDefault(p.getId(), List.of())));
     }
 }

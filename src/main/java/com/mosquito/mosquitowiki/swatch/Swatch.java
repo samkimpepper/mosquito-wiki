@@ -31,6 +31,10 @@ public class Swatch {
     private User user;
 
     @Column(columnDefinition = "TEXT")
+    private String title;
+
+
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)
